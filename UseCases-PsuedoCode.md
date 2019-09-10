@@ -4,120 +4,147 @@
 
 ## Description
 
-This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command prompts allow for simulationg of product ordering, inventory and sales functions.app has command line interface for playing a hangman style game using the US President names as a word set.
-
-The game format is 
-
-1.  User is presented with a random presidential name to guess showing letters as underscores initially
-2.  User guess letter via keyboard - results reveiled
-    1. letter not in name
-    2. letter in name - underscores replaced with letter
-    3. letter already used - list of previsouly used letters shown
-    4. letter in name and solved the word - message followed by next word
-    5. repeat above until pool of presidential names exhausted.  (if time permits allow replay of the whole set of names)
+This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command line prompts which allow for simulation of product ordering, inventory and sales reporting functions.  
 
 ## Database and Function Design
 
-![bamazon-design-sml](/Users/Myles/Bootcamp/WORK/Product-Management-System/assets/images/bamazon-design-sml.jpg)
+![bamazon-design-sml](./assets/images/bamazon-design-sml.jpg)
 
+### Database Model
 
+1. Database model consists of department and product entities with a one to many relationship 
+
+   - a department has 0 to many products
+   - a product has 1 department
+
+2. tables are named "department" and "product"
+
+   - surrogate keys using identity columns are the primary keys for the tables:  department_id and product_id.  Using surrogate keys can have advantages such as ease and speed of tables joins, key permanence allowing alternate key or natural key to change, migration of keys to linkage/junction tables when many to many relationships become necessary (for exanple:  orders to items yielding an item-order linkage table) 
+
+   - item_code has been added to the product table as it is common to have an alterate key for ordering that in some instances can have business intellegence encoded (item code ranges for instance).  item code has a unique index
+   - product table has a foreign key: department_id to link it to the department table
+   - product_sales on the product table has a default value of 0
+   - deparment_name on department table has a unique index
+
+### System Functions
+
+1. Customer
+
+   - module allows user to place order by entering item code & quantity
+     - item code is validated to ensure it exists and ordered quantity is checked against on-hand quantity
+     - following successful order the on-hand qty is decremented and user is shown order detail recap
+
+2. Manager
+
+   - module allows user to perform multiple functions:
+     1. view list of products for sale
+     2. view list of products with low inventory
+     3. add inventory to an item - enter item code and quantity; item code is validated to ensure it exists
+        - on hand quantity in incremented and report of updated item is shown
+     4. add new item - user enters attributes for a new item
+        - item code is validated - it must be unique;  after successful entry report of new item is shown
+
+3. Supervisor
+
+   - module allows user to:
+
+     1. view product sales and profit grouped by department
+     2. add new department - user enters attributes for new department
+
+     - department name is validated - must be unique; after successful entry report of new department is shown
 
 ## User Stories / Use Cases
 
-1.  user starts bash session
+1.  user starts bash session and runs either Customer, Manager or Supervisor js files
 
-2.  user begins with node word-guess-node.js - programs begins in terminal
-    1. displays 'Welcome to Word Guess - US Presidential Edition'
-    2. displays 'Solve each of the 44 president name puzzles, use keyboard A through Z'
-    3. displays 'You lose the puzzle if you accumlate 6 miss quesses, lets begin'
-    4. displays the 'word is:   - - - - -    -    - - - -'  (for GEORGE W BUSH)
-    5. displays the word in format of with underscores
-        1. for readibilty:  2 spaces between each letter and 4 spaces between each name or initial
-    6. 'Type letter a though z'
+2.  bamazonCustomer
+    
+    1.  user is presented with initial prompt with options:  "See Product List", "Place order", "Exit"
+    2.  "See Product List"
+        1.  list is displayed:  item code, department name, retail price of item, on hand quantity and product sales
+    3.  "Place Order"
+        1.    user is prompted to:
+            1.  "Enter Item Code"
+            1. item code is validated - if it does not exist in the product table then message informs user to enter valid item code
+            2.  "Enter Order Quantity"
+                1. order quantity is validated - must be numeric and > 0
+        2.  Order quantity is validated 
+            1. if ordered qty is > on hand qty user is informed "Insufficent on-hand quantity, on-hand: <qty>"
+                1. return to initial prompt
+            2. if order qty <= on hand qty then on-hand qty is decremented by order qty
+                1. user is shown message "Successful Order item code: <item code>, quantity <qty> total cost = <computed cost>"
+                2. return to initial prompt 
+    4.  "Exit" - program exits to terminal
+    
+3. bamazonManager
 
-3.  user types non A through Z key
-    1. display - "you typed '<key>' 'a' through 'z' only please"
-    2. user can type again
-  
-4.  user types letter already used
-    1. display - "you already used '<key>'"
-    2. user can type again
+    1. user is presented with initial prompt with options: "View Products", "View Low Inventory Products", "Update Inventory", "Add a new Product", "Exit"
 
-5.  user types new letter that is not in puzzle and guesses remain
-    1.  display 'Letter <key> is a miss, n guesses remaining'
-    2.  user can type again
+    2. "View Products"
 
-6.  user types new letter that is not in puzzle no remaining guesses
-    1.  display 'Letter <key> is a miss, no remainig guesses'
-    2.  display 'Solution is: G E O R G E    W    B U S H'
-    3.  display 'Next Word'
-    4.  displays the 'word is:   _ _ _ _    _ _ _ _ _ _ _'  (for B I L L    C L I N T O N)
+        1.  product list is display ordered by department name, product_name
+            1.  list appears in table form:  Department Name, Product Name, Retail Price, Stock Quantity, Product Sales
 
-7.  user types new letter that is in the puzzle but doesn't solve puzzle yet
-    1.  display 'Letter <key> is a hit.
-    2.  display 'word is:  G _ _ _ G _    _    _ _ _ _"  (for G in George W Bush)
+    3. "View Low Inventory Products"
 
-8.  user types new letter that solves puzzle
-    1.  display 'Solved, word is G E O R G E    W    B U S H'
-    2.  display 'Next Word'
-    4.  displays the 'word is:   _ _ _ _    _ _ _ _ _ _ _'  (for B I L L    C L I N T O N)
+        1.  product list is displayed for all items with stock_qty < 5
+            1.  list appears in table form:  Department Name, Product Name, Retail Price, Stock Quantity, Product Sales
+            2.  return to initial prompt
 
-9.  user losses or solves last puzzle
-    1. display 'Nice Game - you got X of 44 correct'
-    2. *** if coding time permits allow for prompt to Play Again)
-        1. this would re-randomize the word pool and start new game
+    4. "Update Inventory"
 
-      
+        1.   user is prompted to:
+           1. "Enter Item Code"
+              1. item code is validated - if it does not exist in the product table then message informs user to enter valid item code
+           2. "Enter New Quantity"
+              1. Quantity is validated - must be numeric
+        2. Message displayed the product and updated quantity:  Department Name, Product Name Retail Price, Old Quantity, New  Quantity, Product Sales
+        3. return to initial prompt
+
+    5. "Add a new Product"
+
+        1.  user is prompted for:
+            1.  "Enter Item Code"  - is validated, must be unique - user prompted to re-enter if not
+            2.  "Enter Product Name" - is validated, cannot be null - user prompted to re-enter if not
+            3.  "Choose Department" (SQL join to department table will present list of valid choice)
+            4.  "Enter Retail Price" - is validated, must be numeric > 0 - user prompted to re-enter if not
+            5.  "Enter Stock Quantity" - is validated, must be numeric, can be 0 - users prompted to re-enter if not
+        2.  Message showing new Product is shown: Department Name, Product Id, Item Code, Product Name, Retail Price, Stock Quantity, Product Sales
+        3.  return to initial prompt
+
+    6. Exit" - program exits to terminal
+
+        
+
+4. bamazonSupervisor
+    1. user is presented with initial prompt with options: "View Departement Sales", "Add new Department", "Exit"
+
+    2. "View Department Sales"
+
+       1. user is prompted to:
+          1. "Choose Department" (SQL join to department table will present list of valid choice)
+          2. Results shown:  Department Id, Department Name, Overhead Cost, Department Sales, Profit
+          3. - Department Sales is a computed value: SQL join to product table for given department and compute SUM(product.product_sales)
+             - Profit is a computed value:  SQL join to product table for given department and compute Overhead cost - SUM(product.product_sales)
+       2. return to initial prompt
+
+    3. "Add new Department"
+
+       user is prompted for:
+
+       1. "Enter Department Name"  - is validated, must be unique - user prompted to re-enter if not
+       2. "Enter Overhead Cost" - is validated, must be numeric > 0 - user prompted to re-enter if not
+       3. Message showing new Deparment is shown: Department Id, Department Name, Overhead Cost 
+       4. return to initial prompt
+
+    4. Exit" - program exits to terminal
 
 ### Psuedo Code - details TBD
 
-1. Global
-    1. Variables
-       1. word list array - gets passed to game object for use in wordpool
-2. Functions
-       1. playLetter()  - recursive function played once per user input/letter
+1. bamazonCustomer.js 
+    1. TBD
+2. bamazonManager.js
+       1. TBD
   
-2. Objects/Classes
-    1. letter
-        1. Properties
-            1. letter - a single character holding A thru Z
-            2. isGuessed  - boolean state of letter
-        2. Methods
-            1. getLetter - returns letter character or mask
-            2. setLetter - checks parameter character against letter and set isGuessed to
-            true if a match
-    2. word
-        1. Properties
-            1. word - string containing the word
-            2. letters - array of letter objects for the word
-        2. Methods
-            1. init - constuctor function that builds letter array
-            2. updateWord - take user letter guess and calls setLetter for each letter array entry 
-            3. getWord - returns terminal ready word string - has masks and spacing for readibility
-            4. solveWord - used when player exhausts guesses
-    3. word pool
-        1. Properties
-            1. words - array of Word objects
-        2. Methods
-            1. init - used in constructor - takes array of word strings and intializes word array 
-               loads words randomly so each time game played order is different
-            2. isWordRemaining - boolean whether any words are available
-            3. getWord - pops word object off of the words array, returns it, deletes it 
-            4. showWords - diagnostic console log of the words
-    4. game
-        1. Properties
-            1. guesses
-            2. word pool
-            3. current word
-            4. words won/lost
-        2. Methods
-            1. init - build word pool and get first word
-            2. process Guess - core logic for evaluating the letter guess
-    3. index  - main program flow
-        1. function
-          
-            1. playLetter()  - recursive function played once per user input/letter
-            
-            
-
-#
+2. bamazonSupervisor.js
+    1. TBD

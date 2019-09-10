@@ -27,3 +27,45 @@ connection.connect(function (err) {
   // run the start function after the connection is made to prompt the user
   //start();
 });
+
+// message "welcome to bamazon Customer Order System"
+// main function()
+
+  // prompt to See Product List, Place Order, Exit
+    // inquirer prompt
+    // choices[product list, order, exit]
+    // then promise
+    //     switch
+    //        product list function()
+    //        order function()
+    //        exit function() 
+    //
+    //
+    //  recursive call to main function
+
+
+
+
+// Product List function()
+  // SQL call for list of products
+
+
+
+// Order function()
+  // message to place order
+  // inquirer
+    // prompt for item code
+    // validation( SQL check to see if item code exists - if not then ask for another item code)
+    // prompt for qty
+    // validation > 0
+  // then promise
+    // mySQL call to:  decrement on-hand-qty by order-qty
+    //   trap for mySQL number of rows affected - expecting 1 if 0 that means the item_code does not exist 
+    //   the above won't be needed if i can make the validation at the time of entry into inquirer work
+    //
+    // mySQL call to:  display order result
+
+
+
+// Exit function()
+  // message good-bye & set state flag for exit
