@@ -37,14 +37,14 @@ function main() {
       type: "list",
       message: "Select Option",
       choices: [
-        "See Product List",
+        "View Product List",
         "Place Product Order",
         "Exit"
       ]
     })
     .then(function(answer) {
       switch (answer.option) {
-        case "See Product List":
+        case "View Product List":
           return productList();
 
         case "Place Product Order":
@@ -61,7 +61,8 @@ function main() {
 // SQL call for list of products
 function productList() {
 // console.log("in global.productList");
-  var query =  "SELECT p.item_code \
+  var query =  "SELECT d.department_name \
+                      ,p.item_code \
                       ,p.product_name \
                       ,p.retail_price \
                       ,p.stock_qty \
@@ -81,7 +82,7 @@ function productList() {
 // select item, order qty and update datebase
 // after validating item is valie and order qty > 0
 function productOrder() {
-  console.log("in global.productOrder");
+// console.log("in global.productOrder");
   inquirer
     .prompt([
       {
@@ -108,14 +109,14 @@ function productOrder() {
       }
     ])
     .then(function(answers) {
-      console.log(`Ordering item: ${answers.itemCode} Quantity ordered: ${answers.orderQty}`);
+      console.log(`<<< Ordering item: ${answers.itemCode} Quantity ordered: ${answers.orderQty} >>>`);
       checkItem(answers.itemCode,parseInt(answers.orderQty));
     })  
 }
   
 // check to see if item code is valid
 function checkItem(itemCode,orderQty) {
-  console.log("in global.checkItem");
+// console.log("in global.checkItem");
   var query =  "SELECT p.item_code \
                   FROM product as p \
                  WHERE p.item_code = ?";
@@ -123,7 +124,7 @@ function checkItem(itemCode,orderQty) {
   connection.query(query, [itemCode], function(err, res) {
     if(err) throw err;
     if (res.length === 0) {
-      console.log(`Item Code ${itemCode} does not exist`);
+      console.log(`<<< Item Code ${itemCode} does not exist >>>`);
       main();
     }
     else {
@@ -134,14 +135,14 @@ function checkItem(itemCode,orderQty) {
 
 // check to see if order qty is available
 function checkOrderQty(itemCode,orderQty) {
-  console.log("in global.checkOrderQty");
+// console.log("in global.checkOrderQty");
   var query =  "SELECT p.item_code \
                   FROM product as p \
                  WHERE p.item_code = ? and p.stock_qty >= ? ";
   connection.query(query, [itemCode,orderQty], function(err, res) {
     if(err) throw err;
     if (res.length === 0) {
-      console.log(`Item ${itemCode} does not have quantity of ${orderQty} on hand`);
+      console.log(`<<< Item ${itemCode} does not have quantity of ${orderQty} on hand >>>`);
       main();
     }
     else {
@@ -152,7 +153,7 @@ function checkOrderQty(itemCode,orderQty) {
 
 // update database with order qty
 function updateOrderQty(itemCode,orderQty) {
-  console.log("in global.updateOrderQty");
+// console.log("in global.updateOrderQty");
   var query =  "UPDATE product \
                    SET stock_qty = stock_qty - ? \
                  WHERE item_code = ?";
@@ -164,7 +165,7 @@ function updateOrderQty(itemCode,orderQty) {
 
 // select results of order
 function selectItem(itemCode,orderQty) {
-  console.log("in global.selectItem");
+// console.log("in global.selectItem");
   var query =  "SELECT p.item_code \
                       ,p.retail_price \
                       ,? as order_qty \
@@ -175,7 +176,7 @@ function selectItem(itemCode,orderQty) {
 
   connection.query(query,[orderQty,orderQty,itemCode], function(err, res) {
     if(err) throw err;
-    console.log("Order Succesfull:")
+    console.log("<<< Order Succesfull >>>")
     console.table(res);
     main();
   });
@@ -185,7 +186,7 @@ function selectItem(itemCode,orderQty) {
 // Exit function()
   // message good-bye & set state flag for exit
 function exitSystem() {
-  console.log("in global.exitSystem");
-  console.log("Goodbye");
+// console.log("in global.exitSystem");
+  console.log("<<< Goodbye >>>");
   connection.end();
 } 

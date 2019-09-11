@@ -61,7 +61,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
   
     1.  user is presented with initial prompt with options:  "See Product List", "Place order", "Exit"
     2.  "See Product List"
-        1.  list is displayed:  item code, department name, retail price of item, on hand quantity and product sales
+        1.  list is displayed: department name, item code, product name,  retail price of item, on hand quantity and product sales
     3.  "Place Order"
         1.    user is prompted to:
             1.  "Enter Item Code"
@@ -83,12 +83,12 @@ This node.js mySQL program simulates a retailer ordering and product management 
     2. "View Products"
 
         1.  product list is display ordered by department name, product_name
-            1.  list appears in table form:  Department Name, Product Name, Retail Price, Stock Quantity, Product Sales
+            1.  list appears in table form:  department name, item code, product name,  retail price of item, on hand quantity and product sales
 
     3. "View Low Inventory Products"
 
         1.  product list is displayed for all items with stock_qty < 5
-            1.  list appears in table form:  Department Name, Product Name, Retail Price, Stock Quantity, Product Sales
+            1.  list appears in table form:  department name, item code, product name,  retail price of item, on hand quantity and product sales
             2.  return to initial prompt
 
     4. "Update Inventory"

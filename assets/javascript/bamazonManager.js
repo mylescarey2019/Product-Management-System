@@ -25,5 +25,463 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
-  //start();
+  console.log("Welcome to Bamazon Product Management System - Manager Function");
+  main();
 });
+
+// main recursive function
+function main() {
+  inquirer
+    .prompt({
+      name: "option",
+      type: "list",
+      message: "Select Option",
+      choices: [
+        "View Product List",
+        "View Low Inventory Products",
+        "Update Inventory",
+        "Add a new Product",
+        "Exit"
+      ]
+    })
+    .then(function(answer) {
+      switch (answer.option) {
+        case "View Product List":
+          return productList();
+
+        case "View Low Inventory Products":
+          return lowInventory();
+
+        case "Update Inventory":
+          return updateInventory();
+
+        case "Add a new Product":
+          return addProduct();
+
+        case "Exit":
+            return exitSystem(); 
+      }
+    });
+}
+
+// Product List function
+// SQL call for list of products
+function productList() {
+// console.log("in global.productList");
+    var query =  "SELECT d.department_name \
+                        ,p.item_code \
+                        ,p.product_name \
+                        ,p.retail_price \
+                        ,p.stock_qty \
+                        ,p.product_sales \
+                    FROM product as p \
+                    JOIN department as d \
+                      ON p.department_id = d.department_id \
+                   ORDER BY d.department_name, p.product_name";
+    connection.query(query, function(err, res) {
+      if(err) throw err;
+      console.table(res);
+      main();
+    })
+  }
+
+// Low Inventory Product List function
+// SQL call for list of products
+function lowInventory() {
+// console.log("in global.lowInventory");
+    var query =  "SELECT d.department_name \
+                        ,p.item_code \
+                        ,p.product_name \
+                        ,p.stock_qty \
+                    FROM product as p \
+                    JOIN department as d \
+                      ON p.department_id = d.department_id \
+                   WHERE p.stock_qty < 5 \
+                   ORDER BY d.department_name, p.product_name";
+    connection.query(query, function(err, res) {
+      if(err) throw err;
+      console.table(res);
+      main();
+    })
+  }
+
+
+
+
+// update inventory function
+// select item, added qty and update datebase
+// after validating item is valid and requested qty > 0
+function updateInventory() {
+// console.log("in global.updateInvetory");
+  inquirer
+    .prompt([
+      {
+        name: "itemCode",
+        type: "input",
+        message: "Enter Item Code",
+        validate: function(value) {
+          if (isNaN(value) === true) {
+            return "Item Code must be numeric";
+          }
+          return true;
+        }
+      },
+      {
+        name: "qtyAdded",
+        type: "input",
+        message: "Enter Quantity to Add",   
+        validate: function(value) {
+          if (value > 0) {
+            return true;
+          }
+          return "Quantity must be > 0";
+        }
+      }
+    ])
+    .then(function(answers) {
+      console.log(`<<< Updating item: ${answers.itemCode} Quantity added: ${answers.qtyAdded} >>>`);
+      checkItemExists(answers.itemCode,parseInt(answers.qtyAdded));
+    })  
+}
+
+// check to see if item code is valid
+function checkItemExists(itemCode,qtyAdded) {
+// console.log("in global.checkItemExists");
+  var query =  "SELECT p.item_code \
+                  FROM product as p \
+                 WHERE p.item_code = ?";
+
+  connection.query(query, [itemCode], function(err, res) {
+    if(err) throw err;
+    if (res.length === 0) {
+      console.log(`<<< Item Code ${itemCode} does not exist >>>`);
+      main();
+    }
+    else {
+      updateQty(itemCode,qtyAdded);
+    }
+  });
+};
+
+// update database with added qty
+function updateQty(itemCode,qtyAdded) {
+// console.log("in global.updateQty");
+  var query =  "UPDATE product \
+                   SET stock_qty = stock_qty + ? \
+                 WHERE item_code = ?";
+  connection.query(query, [qtyAdded,itemCode], function(err, res) {
+    if(err) throw err;
+    selectItem(itemCode);
+  })
+};
+
+// show item and its updated inventory
+function selectItem(itemCode) {
+// console.log("in global.selectItem");
+    var query =  "SELECT d.department_name \
+                        ,p.item_code \
+                        ,p.product_name \
+                        ,p.stock_qty \
+                    FROM product as p \
+                    JOIN department as d \
+                      ON p.department_id = d.department_id \
+                   WHERE p.item_code = ? \
+                   ORDER BY d.department_name, p.product_name";
+    connection.query(query, [itemCode], function(err, res) {
+      if(err) throw err;
+      console.table(res);
+      main();
+    })
+  }
+
+
+
+
+
+// add a new product
+// user enters item_code, name, chooses a department, enters
+// retail price and stock qty
+// after validating item is valid and requested qty > 0
+function addProduct() {
+// console.log("in global.addProduct");
+// query database for department domain
+  connection.query("SELECT d.department_name \
+                      FROM department AS d \
+                     ORDER BY d.department_name", function(err, results) {
+    inquirer
+      .prompt([
+        {
+          name: "itemCode",
+          type: "input",
+          message: "Enter Item Code",
+          validate: function(value) {
+            if (isNaN(value) === true) {
+              return "Item Code must be numeric";
+            }
+            return true;
+          }
+        },
+        {
+          name: "productName",
+          type: "input",
+          message: "Enter Product Name",   
+          validate: function(value) {
+            if (value !== null) {
+              return true;
+            }
+            return "Product Name cannot be blank";
+          }
+        },
+        {
+          name: "departmentName",
+          type: "rawlist",
+          // choices: function() {
+          //   var choiceArray = [];
+          //   for (var i = 0; i < results.length; i++) {
+          //     choiceArray.push(results[i].department_name);
+          //   }
+          //   return choiceArray;
+          // },
+          choices: function() {
+            return results.map(row => row.department_name);
+          },
+          message: "Enter Department",   
+        },
+        {
+          name: "retailPrice",
+          type: "input",
+          message: "Enter Retail Price",   
+          validate: function(value) {
+            if (parseFloat(value) > 0) {
+              return true;
+            }
+            return "Retail Price must be > 0";
+          }
+        },
+        {
+          name: "stockQty",
+          type: "input",
+          message: "Enter Stock Quantity",   
+          validate: function(value) {
+            if (value >= 0) {
+              return true;
+            }
+            return "Stock Quantity cannot be blank";
+          }
+        },
+      ])
+      .then(function(answers) {
+        // console.log(`<<< Adding item: ${answers.itemCode} : ${answers.productName} : ${answers.departmentName} : ${answers.retailPrice} : ${answers.stockQty} >>>`);
+        checkItemNotExists(answers.itemCode,answers.productName,answers.departmentName,answers.retailPrice,answers.stockQty);
+      })  
+  })
+}
+
+// check to see if item code is unique (new)
+function checkItemNotExists(itemCode,productName,departmentName,retailPrice,stockQty) {
+// console.log("in global.checkItemNotExists");
+  var query =  "SELECT p.item_code \
+                  FROM product as p \
+                 WHERE p.item_code = ?";
+  connection.query(query, [itemCode], function(err, res) {
+    if(err) throw err;
+    if (res.length > 0) {
+      console.log(`<<< Item Code ${itemCode} already exists >>>`);
+      main();
+    }
+    else {
+      insertProduct(itemCode,productName,departmentName,retailPrice,stockQty);
+    }
+  });
+};
+
+// insert new Product
+function insertProduct(itemCode,productName,departmentName,retailPrice,stockQty) {
+// console.log("in global.insertProduct");
+  var query =  "INSERT \
+                  INTO product \
+                 SELECT 0 \
+                       ,? \
+                       ,? \
+                       ,(SELECT d.department_id FROM department AS d WHERE d.department_name = ?) \
+                       ,? \
+                       ,? \
+                       ,0";
+  connection.query(query, [itemCode,productName,departmentName,retailPrice,stockQty], function(err, res) {
+    if(err) throw err;
+    if (res.affectedRows > 0) {
+      console.log(`<<< Item Code ${itemCode} : ${productName} added to ${departmentName} >>>`);
+      selectItem(itemCode);
+    }
+    else {
+      console.log(`<<< Unexpected failure trying to add Item Code ${itemCode} : ${productName} to ${departmentName} >>>`);
+      main();
+    }
+  });
+};
+
+// select results of product add
+function selectItem(itemCode) {
+  // console.log("in global.selectItem");
+  var query =  "SELECT d.department_name \
+                      ,p.item_code \
+                      ,p.product_name \
+                      ,p.retail_price \
+                      ,p.stock_qty \
+                      ,p.product_sales \
+                  FROM product as p \
+                  JOIN department as d \
+                    ON p.department_id = d.department_id \
+                 WHERE p.item_code = ? \
+                 ORDER BY d.department_name, p.product_name";
+    connection.query(query,[itemCode], function(err, res) {
+      if(err) throw err;
+      console.table(res);
+      main();
+    });
+  };
+
+
+
+
+// Exit function()
+// message good-bye & set state flag for exit
+function exitSystem() {
+  console.log("in global.exitSystem");
+  console.log("Goodbye");
+  connection.end();
+} 
+
+
+// // Product List function
+// // SQL call for list of products
+// function productList() {
+// // console.log("in global.productList");
+//   var query =  "SELECT p.item_code \
+//                       ,p.product_name \
+//                       ,p.retail_price \
+//                       ,p.stock_qty \
+//                       ,p.product_sales \
+//                   FROM product as p \
+//                   JOIN department as d \
+//                     ON p.department_id = d.department_id \
+//                  ORDER BY d.department_name, p.product_name";
+//   connection.query(query, function(err, res) {
+//     if(err) throw err;
+//     console.table(res);
+//     main();
+//   })
+// }
+
+// // product order function
+// // select item, order qty and update datebase
+// // after validating item is valie and order qty > 0
+// function productOrder() {
+//   console.log("in global.productOrder");
+//   inquirer
+//     .prompt([
+//       {
+//         name: "itemCode",
+//         type: "input",
+//         message: "Enter Item Code",
+//         validate: function(value) {
+//           if (isNaN(value) === true) {
+//             return "Item Code must be numeric";
+//           }
+//           return true;
+//         }
+//       },
+//       {
+//         name: "orderQty",
+//         type: "input",
+//         message: "Enter Order Quantity",   
+//         validate: function(value) {
+//           if (value > 0) {
+//             return true;
+//           }
+//           return "Order quantity must be > 0";
+//         }
+//       }
+//     ])
+//     .then(function(answers) {
+//       console.log(`Ordering item: ${answers.itemCode} Quantity ordered: ${answers.orderQty}`);
+//       checkItem(answers.itemCode,parseInt(answers.orderQty));
+//     })  
+// }
+  
+// // check to see if item code is valid
+// function checkItem(itemCode,orderQty) {
+//   console.log("in global.checkItem");
+//   var query =  "SELECT p.item_code \
+//                   FROM product as p \
+//                  WHERE p.item_code = ?";
+
+//   connection.query(query, [itemCode], function(err, res) {
+//     if(err) throw err;
+//     if (res.length === 0) {
+//       console.log(`Item Code ${itemCode} does not exist`);
+//       main();
+//     }
+//     else {
+//       checkOrderQty(itemCode,orderQty);
+//     }
+//   });
+// };
+
+// // check to see if order qty is available
+// function checkOrderQty(itemCode,orderQty) {
+//   console.log("in global.checkOrderQty");
+//   var query =  "SELECT p.item_code \
+//                   FROM product as p \
+//                  WHERE p.item_code = ? and p.stock_qty >= ? ";
+//   connection.query(query, [itemCode,orderQty], function(err, res) {
+//     if(err) throw err;
+//     if (res.length === 0) {
+//       console.log(`Item ${itemCode} does not have quantity of ${orderQty} on hand`);
+//       main();
+//     }
+//     else {
+//       updateOrderQty(itemCode,orderQty);
+//     }
+//   })
+// };
+
+// // update database with order qty
+// function updateOrderQty(itemCode,orderQty) {
+//   console.log("in global.updateOrderQty");
+//   var query =  "UPDATE product \
+//                    SET stock_qty = stock_qty - ? \
+//                  WHERE item_code = ?";
+//   connection.query(query, [orderQty,itemCode], function(err, res) {
+//     if(err) throw err;
+//     selectItem(itemCode,orderQty);
+//   })
+// };
+
+// // select results of order
+// function selectItem(itemCode,orderQty) {
+//   console.log("in global.selectItem");
+//   var query =  "SELECT p.item_code \
+//                       ,p.retail_price \
+//                       ,? as order_qty \
+//                       ,p.retail_price * ? AS total_order_cost \
+//                       ,p.stock_qty AS new_stock_qty \
+//                   FROM product as p \
+//                  WHERE p.item_code = ?"
+
+//   connection.query(query,[orderQty,orderQty,itemCode], function(err, res) {
+//     if(err) throw err;
+//     console.log("Order Succesfull:")
+//     console.table(res);
+//     main();
+//   });
+// };
+
+
+// // Exit function()
+//   // message good-bye & set state flag for exit
+// function exitSystem() {
+//   console.log("in global.exitSystem");
+//   console.log("Goodbye");
+//   connection.end();
+// } 
