@@ -19,6 +19,10 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
   - ####  [Test Cases](TestCases.md)
 
+- #### Data Model & Design Whiteboard:
+
+![bamazon-design-sml](/Users/Myles/Bootcamp/WORK/Product-Management-System/assets/images/bamazon-design-sml.jpg)
+
 #### Example walkthru GIF :
 
 
@@ -26,7 +30,8 @@ This node.js mySQL program simulates a retailer ordering and product management 
 ## Getting Started
 
 ### Native and NPM Packages Used
-1.  inquirer  - for interactive command line response on command typos
+1.  inquirer  - for interactive command line response 
+2.  mysql - for database connectivity
 
 
 ### Dependencies
@@ -44,6 +49,13 @@ This node.js mySQL program simulates a retailer ordering and product management 
   2. run program:   node bamazonManager.js
   3. run program:   node bamazonSupervisor.js
   
+
+#### Possible Enhancements
+
+1. expand the data model by adding  order, order line item and order total tables
+2. expand function to support multi item orders using above data model
+3. add item code assignment stored procedure with simulated business rules instead of having user pick new item codes
+
 
 
 ## Authors

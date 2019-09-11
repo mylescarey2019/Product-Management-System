@@ -6,25 +6,49 @@
 
 This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command line prompts which allow for simulation of product ordering, inventory and sales reporting functions.  
 
-## Database and Function Design
-
-![bamazon-design-sml](./assets/images/bamazon-design-sml.jpg)
-
 ### Database Model
 
 1. Database model consists of department and product entities with a one to many relationship 
 
    - a department has 0 to many products
    - a product has 1 department
+   - data model is normalized
 
-2. tables are named "department" and "product"
+2. Tables:  department and product
 
    - surrogate keys using identity columns are the primary keys for the tables:  department_id and product_id.  Using surrogate keys can have advantages such as ease and speed of tables joins, key permanence allowing alternate key or natural key to change, migration of keys to linkage/junction tables when many to many relationships become necessary (for exanple:  orders to items yielding an item-order linkage table) 
 
-   - item_code has been added to the product table as it is common to have an alterate key for ordering that in some instances can have business intellegence encoded (item code ranges for instance).  item code has a unique index
-   - product table has a foreign key: department_id to link it to the department table
+   - item_code has been added to the product table as it is common to have an alterate key for ordering that in some instances can have business intellegence encoded (item code ranges for instance).  item code has a unique index (UK)
+   
+     ```mysql
+     CREATE UNIQUE INDEX UX1_product_item_code
+         ON product (item_code);
+     ```
+   
+   - Normally an order code key would have an internal assignment module, but for the scope of this project the user will be responsible for entering unique item codes when add new products to the database.
+   
    - product_sales on the product table has a default value of 0
-   - deparment_name on department table has a unique index
+   
+   - department_name on department table has a unique index (UK)
+   
+     ```mysql
+     CREATE UNIQUE INDEX UX1_department_department_name
+         ON department (department_name);
+     ```
+   
+     
+   
+3. Relationships
+
+   - product table has a foreign key: department_id (FK) to link it to the department table
+
+     ```mysql
+     ALTER TABLE product
+     ADD CONSTRAINT FK_product_department
+     FOREIGN KEY (department_id) REFERENCES department(department_id);
+     ```
+
+     
 
 ### System Functions
 
