@@ -95,22 +95,24 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
         1.   user is prompted to:
            1. "Enter Item Code"
-              1. item code is validated - if it does not exist in the product table then message informs user to enter valid item code
-           2. "Enter New Quantity"
-              1. Quantity is validated - must be numeric
-        2. Message displayed the product and updated quantity:  Department Name, Product Name Retail Price, Old Quantity, New  Quantity, Product Sales
-        3. return to initial prompt
+              1. item code must be numeric > 0
+           2. "Enter Quantity to Add "
+              1. Quantity is validated - must be numeric and > 0
+        2. Validation - if item code does not exist or add qty not > 0 transaction is cancelled
+        3.   Message displayed the product and updated quantity:  Department Name, Product Name Retail Price, Old Quantity, New  Quantity, Product Sales
+        4.   return to initial prompt
 
     5. "Add a new Product"
 
         1.  user is prompted for:
-            1.  "Enter Item Code"  - is validated, must be unique - user prompted to re-enter if not
+            1.  "Enter Item Code"  - is validated must be numeric > 0
             2.  "Enter Product Name" - is validated, cannot be null - user prompted to re-enter if not
             3.  "Choose Department" (SQL join to department table will present list of valid choice)
             4.  "Enter Retail Price" - is validated, must be numeric > 0 - user prompted to re-enter if not
             5.  "Enter Stock Quantity" - is validated, must be numeric, can be 0 - users prompted to re-enter if not
-        2.  Message showing new Product is shown: Department Name, Product Id, Item Code, Product Name, Retail Price, Stock Quantity, Product Sales
-        3.  return to initial prompt
+        2.  Validation - if item code already exist the transaction is cancelled
+        3.  Message showing new Product is shown: Department Name, Product Id, Item Code, Product Name, Retail Price, Stock Quantity, Product Sales
+        4.  return to initial prompt
 
     6. Exit" - program exits to terminal
 
@@ -132,11 +134,12 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
        user is prompted for:
 
-       1. "Enter Department Name"  - is validated, must be unique - user prompted to re-enter if not
+       1. "Enter Department Name"  - is validated, cannot be null - user prompted to re-enter if so
        2. "Enter Overhead Cost" - is validated, must be numeric > 0 - user prompted to re-enter if not
        3. Message showing new Deparment is shown: Department Id, Department Name, Overhead Cost 
-       4. return to initial prompt
-
+       4. Validation - if department name already exists - transaction is cancelled
+   5. return to initial prompt
+    
     4. Exit" - program exits to terminal
 
 ### Psuedo Code - details TBD

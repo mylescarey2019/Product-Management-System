@@ -10,7 +10,7 @@ Functionality Cases
     1. exit	- expect program to exit to terminal
     2. see product list - expect product list to be displayed with items
     3. see product list when no items exist - expect empty display grid
-    4. place order - item code does not exist - expect prompt asking for re-entry
+    4. place order - item code does not exist - expect cancelled transaction
     5. place order - item code exists
         1. expect prompt for order quantity
             1. enter non-numer - expect prompt for re-entry
