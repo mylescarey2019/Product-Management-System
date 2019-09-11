@@ -41,6 +41,7 @@ function main() {
         "View Low Inventory Products",
         "Update Inventory",
         "Add a new Product",
+        "View Orders by Date Range",
         "Exit"
       ]
     })
@@ -57,6 +58,9 @@ function main() {
 
         case "Add a new Product":
           return addProduct();
+
+        case "View Orders by Date Range":
+          return viewOrders();    
 
         case "Exit":
             return exitSystem(); 
@@ -342,6 +346,64 @@ function selectItem(itemCode) {
   };
 
 
+// view orders that occured between two dates
+function viewOrders() {
+  // console.log("in global.viewOrders");
+    inquirer
+      .prompt([
+        {
+          name: "startDate",
+          type: "input",
+          message: "Enter Start Date YYYY-MM-DD",
+          validate: function(value) {
+            var pass = value.match(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/i);
+            if (pass) {
+              return true;
+            } else {
+              return "Please date in format YYYY-MM-DD";
+            }
+          }
+        },
+        {
+          name: "endDate",
+          type: "input",
+          message: "Enter End Date YYYY-MM-DD",
+          validate: function(value) {
+            var pass = value.match(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/i);
+            if (pass) {
+              return true;
+            } else {
+              return "Please date in format YYYY-MM-DD";
+            }
+          }
+        }
+      ])
+      .then(function(answers) {
+        console.log(`<<< Viewing orders for ${answers.startDate} through ${answers.endDate} >>>`);
+        var query =  "SELECT  o.product_order_id \
+                             ,d.department_name \
+                             ,DATE_FORMAT(o.order_date,'%Y-%m-%d') AS order_date \
+                             ,p.item_code \
+                             ,p.product_name \
+                             ,o.retail_price \
+                             ,o.order_qty \
+                             ,o.extended_cost \
+                        FROM product_order AS o \
+                        JOIN product AS p \
+                          ON o.product_id = p.product_id \
+                        JOIN department AS d \
+                          ON d.department_id = p.department_id \
+                        WHERE o.order_date BETWEEN ? AND ? \
+                        ORDER BY d.department_name \
+                                ,o.order_date \
+                                ,p.product_name";
+        connection.query(query, [answers.startDate,answers.endDate], function(err, res) {
+          if(err) throw err;
+          console.table(res);
+          main();
+          })
+      })  
+  }; 
 
 
 // Exit function()

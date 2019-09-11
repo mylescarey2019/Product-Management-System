@@ -13,6 +13,14 @@ SELECT p.item_code
     ON p.department_id = d.department_id
  ORDER BY d.department_name, p.product_name
 
+-- insert product_order
+INSERT 
+  INTO product_order
+ SELECT 0 
+       ,'2019-09-11'
+	   ,3
+	   ,13
+	   ,29.99;
 
 -- Manager Functions
 

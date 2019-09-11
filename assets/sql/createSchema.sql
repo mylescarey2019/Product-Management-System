@@ -31,3 +31,19 @@ FOREIGN KEY (department_id) REFERENCES department(department_id);
 CREATE UNIQUE INDEX UX1_product_item_code
     ON product (item_code);
 
+CREATE TABLE product_order (
+  product_order_id INT NOT NULL AUTO_INCREMENT,
+  order_date DATE NOT NULL,
+  product_id INT NOT NULL,
+  order_qty INT NOT NULL,
+  retail_price DECIMAL(7,2) NOT NULL,
+  extended_cost DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY(product_order_id)
+);
+
+ALTER TABLE product_order
+ADD CONSTRAINT FK_product_order_product
+FOREIGN KEY (product_id) REFERENCES product(product_id);
+
+
+

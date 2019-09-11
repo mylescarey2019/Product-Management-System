@@ -151,15 +151,42 @@ function checkOrderQty(itemCode,orderQty) {
   })
 };
 
-// update database with order qty
+// update database with order qty & update product_sales
 function updateOrderQty(itemCode,orderQty) {
 // console.log("in global.updateOrderQty");
   var query =  "UPDATE product \
                    SET stock_qty = stock_qty - ? \
+                      ,product_sales = product_sales + (retail_price * ?) \
                  WHERE item_code = ?";
-  connection.query(query, [orderQty,itemCode], function(err, res) {
+  connection.query(query, [orderQty,orderQty,itemCode], function(err, res) {
     if(err) throw err;
-    selectItem(itemCode,orderQty);
+    insertOrder(itemCode,orderQty);
+  })
+};
+
+// insert into product_order table
+function insertOrder(itemCode,orderQty) {
+  // console.log("in global.insertOrder");
+  var query =  "INSERT \
+                  INTO product_order \
+                 SELECT  0 \
+                        ,CURDATE() \
+                        ,p.product_id \
+                        ,? \
+                        ,p.retail_price \
+                        ,p.retail_price * ? \
+                   FROM product AS p \
+                  WHERE p.item_code = ?";
+  connection.query(query, [orderQty,orderQty,itemCode], function(err, res) {
+    if(err) throw err;
+    if (res.affectedRows > 0) {
+      console.log(`<<< product_order for ${itemCode} inserted >>>`);
+      selectItem(itemCode,orderQty);
+    }
+    else {
+      console.log(`<<< Unexpected failure trying to add product_order for ${itemCode} : >>>`);
+      main();
+    }
   })
 };
 

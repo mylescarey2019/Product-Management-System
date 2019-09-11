@@ -8,15 +8,16 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
 ### Database Model
 
-1. Database model consists of department and product entities with a one to many relationship 
+1. Database model consists of department, product and product_order entities 
 
    - a department has 0 to many products
    - a product has 1 department
+   - in this simulation product_order has 1 product per row (if more realistic there would be an order header and order line item  to support a many to many relationship between orders and products)
    - data model is normalized
 
-2. Tables:  department and product
+2. Tables:  department, product and product_order
 
-   - surrogate keys using identity columns are the primary keys for the tables:  department_id and product_id.  Using surrogate keys can have advantages such as ease and speed of tables joins, key permanence allowing alternate key or natural key to change, migration of keys to linkage/junction tables when many to many relationships become necessary (for exanple:  orders to items yielding an item-order linkage table) 
+   - surrogate keys using identity columns are the primary keys for the tables:  department_id, product_id and product_order_id.  Using surrogate keys can have advantages such as ease and speed of tables joins, key permanence allowing alternate key or natural key to change, migration of keys to linkage/junction tables when many to many relationships become necessary (for exanple:  orders to items yielding an item-order linkage table) 
 
    - item_code has been added to the product table as it is common to have an alterate key for ordering that in some instances can have business intellegence encoded (item code ranges for instance).  item code has a unique index (UK)
    
@@ -36,8 +37,6 @@ This node.js mySQL program simulates a retailer ordering and product management 
          ON department (department_name);
      ```
    
-     
-   
 3. Relationships
 
    - product table has a foreign key: department_id (FK) to link it to the department table
@@ -46,6 +45,14 @@ This node.js mySQL program simulates a retailer ordering and product management 
      ALTER TABLE product
      ADD CONSTRAINT FK_product_department
      FOREIGN KEY (department_id) REFERENCES department(department_id);
+     ```
+
+   - product_order table has a foreign key: product_id (FK) to link it to the product table
+
+     ```mysql
+     ALTER TABLE product_order
+     ADD CONSTRAINT FK_product_order_product
+     FOREIGN KEY (product_id) REFERENCES product(product_id);
      ```
 
      
@@ -65,8 +72,11 @@ This node.js mySQL program simulates a retailer ordering and product management 
      2. view list of products with low inventory
      3. add inventory to an item - enter item code and quantity; item code is validated to ensure it exists
         - on hand quantity in incremented and report of updated item is shown
-     4. add new item - user enters attributes for a new item
+     4. add new product - user enters attributes for a new item
         - item code is validated - it must be unique;  after successful entry report of new item is shown
+     5. view product orders by date range
+        - start and end dates must be valid - format YYYY-MM-DD
+        - list of orders shown that occured between the start and end dates inclusive
 
 3. Supervisor
 
@@ -138,9 +148,21 @@ This node.js mySQL program simulates a retailer ordering and product management 
         3.  Message showing new Product is shown: Department Name, Product Id, Item Code, Product Name, Retail Price, Stock Quantity, Product Sales
         4.  return to initial prompt
 
-    6. Exit" - program exits to terminal
+    6. "View Orders by Date Range"
 
-        
+        1. user is prompted to:
+
+            1. enter start date - is validated - must be format YYYY-MM-DD
+
+            2. enter end date - is validated - must be format YYYY-MM-DD
+
+            3. list of orders ocurring within those dates is shown in format:
+
+                product_order_id, department_name, order date, item code, product name, retail price, order qty, extended cost
+
+    7. Exit" - program exits to terminal
+
+          
 
 4. bamazonSupervisor
     1. user is presented with initial prompt with options: "View Departement Sales", "Add new Department", "Exit"
