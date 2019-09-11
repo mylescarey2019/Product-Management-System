@@ -21,7 +21,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
 - #### Data Model & Design Whiteboard:
 
-![bamazon-design-sml](/Users/Myles/Bootcamp/WORK/Product-Management-System/assets/images/bamazon-design-sml.jpg)
+![bamazon-design-sml](./assets/images/bamazon-design-sml.jpg)
 
 #### Example walkthru GIF :
 
