@@ -25,47 +25,167 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
-  //start();
+  console.log("Welcome to Bamazon Product Management System - Customer Function");
+  main();
 });
 
-// message "welcome to bamazon Customer Order System"
-// main function()
+// main recursive function
+function main() {
+  inquirer
+    .prompt({
+      name: "option",
+      type: "list",
+      message: "Select Option",
+      choices: [
+        "See Product List",
+        "Place Product Order",
+        "Exit"
+      ]
+    })
+    .then(function(answer) {
+      switch (answer.option) {
+        case "See Product List":
+          return productList();
 
-  // prompt to See Product List, Place Order, Exit
-    // inquirer prompt
-    // choices[product list, order, exit]
-    // then promise
-    //     switch
-    //        product list function()
-    //        order function()
-    //        exit function() 
-    //
-    //
-    //  recursive call to main function
+        case "Place Product Order":
+          return productOrder();
+
+        case "Exit":
+            return exitSystem(); 
+      }
+    });
+}
 
 
+// Product List function
+// SQL call for list of products
+function productList() {
+// console.log("in global.productList");
+  var query =  "SELECT p.item_code \
+                      ,p.product_name \
+                      ,p.retail_price \
+                      ,p.stock_qty \
+                      ,p.product_sales \
+                  FROM product as p \
+                  JOIN department as d \
+                    ON p.department_id = d.department_id \
+                 ORDER BY d.department_name, p.product_name";
+  connection.query(query, function(err, res) {
+    if(err) throw err;
+    console.table(res);
+    main();
+  })
+}
 
+// product order function
+// select item, order qty and update datebase
+// after validating item is valie and order qty > 0
+function productOrder() {
+  console.log("in global.productOrder");
+  inquirer
+    .prompt([
+      {
+        name: "itemCode",
+        type: "input",
+        message: "Enter Item Code",
+        validate: function(value) {
+          if (isNaN(value) === true) {
+            return "Item Code must be numeric";
+          }
+          return true;
+        }
+      },
+      {
+        name: "orderQty",
+        type: "input",
+        message: "Enter Order Quantity",   
+        validate: function(value) {
+          if (value > 0) {
+            return true;
+          }
+          return "Order quantity must be > 0";
+        }
+      }
+    ])
+    .then(function(answers) {
+      console.log(`Ordering item: ${answers.itemCode} Quantity ordered: ${answers.orderQty}`);
+      checkItem(answers.itemCode,parseInt(answers.orderQty));
+    })  
+}
+  
+// check to see if item code is valid
+function checkItem(itemCode,orderQty) {
+  console.log("in global.checkItem");
+  var query =  "SELECT p.item_code \
+                  FROM product as p \
+                 WHERE p.item_code = ?";
 
-// Product List function()
-  // SQL call for list of products
+  connection.query(query, [itemCode], function(err, res) {
+    if(err) throw err;
+    if (res.length === 0) {
+      console.log(`Item Code ${itemCode} does not exist`);
+      main();
+    }
+    else {
+      checkOrderQty(itemCode,orderQty);
+    }
+  });
+};
 
+// check to see if order qty is available
+function checkOrderQty(itemCode,orderQty) {
+  console.log("in global.checkOrderQty");
+  var query =  "SELECT p.item_code \
+                  FROM product as p \
+                 WHERE p.item_code = ? and p.stock_qty >= ? ";
+  connection.query(query, [itemCode,orderQty], function(err, res) {
+    if(err) throw err;
+    if (res.length === 0) {
+      console.log(`Item ${itemCode} does not have quantity of ${orderQty} on hand`);
+      main();
+    }
+    else {
+      updateOrderQty(itemCode,orderQty);
+    }
+  })
+};
 
+// update database with order qty
+function updateOrderQty(itemCode,orderQty) {
+  console.log("in global.updateOrderQty");
+  var query =  "UPDATE product \
+                   SET stock_qty = stock_qty - ? \
+                 WHERE item_code = ?";
+  connection.query(query, [orderQty,itemCode], function(err, res) {
+    if(err) throw err;
+    selectItem(itemCode,orderQty);
+  })
+};
 
-// Order function()
-  // message to place order
-  // inquirer
-    // prompt for item code
-    // validation( SQL check to see if item code exists - if not then ask for another item code)
-    // prompt for qty
-    // validation > 0
-  // then promise
-    // mySQL call to:  decrement on-hand-qty by order-qty
-    //   trap for mySQL number of rows affected - expecting 1 if 0 that means the item_code does not exist 
-    //   the above won't be needed if i can make the validation at the time of entry into inquirer work
-    //
-    // mySQL call to:  display order result
+// select results of order
+function selectItem(itemCode,orderQty) {
+  console.log("in global.selectItem");
+  var query =  "SELECT p.item_code \
+                      ,p.retail_price \
+                      ,? as order_qty \
+                      ,p.retail_price * ? AS total_order_cost \
+                      ,p.stock_qty AS new_stock_qty \
+                  FROM product as p \
+                 WHERE p.item_code = ?"
 
+  connection.query(query,[orderQty,orderQty,itemCode], function(err, res) {
+    if(err) throw err;
+    console.log("Order Succesfull:")
+    console.table(res);
+    main();
+  });
+};
 
 
 // Exit function()
   // message good-bye & set state flag for exit
+function exitSystem() {
+  console.log("in global.exitSystem");
+  console.log("Goodbye");
+  connection.end();
+} 

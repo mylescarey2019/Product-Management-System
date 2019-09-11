@@ -58,18 +58,18 @@ This node.js mySQL program simulates a retailer ordering and product management 
 1.  user starts bash session and runs either Customer, Manager or Supervisor js files
 
 2.  bamazonCustomer
-    
+  
     1.  user is presented with initial prompt with options:  "See Product List", "Place order", "Exit"
     2.  "See Product List"
         1.  list is displayed:  item code, department name, retail price of item, on hand quantity and product sales
     3.  "Place Order"
         1.    user is prompted to:
             1.  "Enter Item Code"
-            1. item code is validated - if it does not exist in the product table then message informs user to enter valid item code
+            1. item code is validated - must be numeric
             2.  "Enter Order Quantity"
                 1. order quantity is validated - must be numeric and > 0
-        2.  Order quantity is validated 
-            1. if ordered qty is > on hand qty user is informed "Insufficent on-hand quantity, on-hand: <qty>"
+        2.  Order  is validated 
+            1. if item code does not exist or ordered qty is > on hand qty user is informed "Item does not exist"  or "Insufficent on-hand quantity, on-hand"
                 1. return to initial prompt
             2. if order qty <= on hand qty then on-hand qty is decremented by order qty
                 1. user is shown message "Successful Order item code: <item code>, quantity <qty> total cost = <computed cost>"
