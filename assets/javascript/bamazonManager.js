@@ -39,7 +39,7 @@ function main() {
       choices: [
         "View Product List",
         "View Low Inventory Products",
-        "Update Inventory",
+        "Add Inventory",
         "Add a new Product",
         "View Orders by Date Range",
         "Exit"
@@ -53,8 +53,8 @@ function main() {
         case "View Low Inventory Products":
           return lowInventory();
 
-        case "Update Inventory":
-          return updateInventory();
+        case "Add Inventory":
+          return addInventory();
 
         case "Add a new Product":
           return addProduct();
@@ -112,11 +112,11 @@ function lowInventory() {
 
 
 
-// update inventory function
+// add inventory function
 // select item, added qty and update datebase
 // after validating item is valid and requested qty > 0
-function updateInventory() {
-// console.log("in global.updateInvetory");
+function addInventory() {
+// console.log("in global.addInvetory");
   inquirer
     .prompt([
       {
@@ -247,7 +247,8 @@ function addProduct() {
           //   return choiceArray;
           // },
           choices: function() {
-            return results.map(row => row.department_name);
+            return results.map(row => row.department_name);  // my refactoring
+            //return results.map(({department_name}) => department_name);  // will use this refactoring after I have studied it for understanding
           },
           message: "Enter Department",   
         },
@@ -315,7 +316,7 @@ function insertProduct(itemCode,productName,departmentName,retailPrice,stockQty)
     if(err) throw err;
     if (res.affectedRows > 0) {
       console.log(`<<< Item Code ${itemCode} : ${productName} added to ${departmentName} >>>`);
-      selectItem(itemCode);
+      selectItemAdded(res.insertId);
     }
     else {
       console.log(`<<< Unexpected failure trying to add Item Code ${itemCode} : ${productName} to ${departmentName} >>>`);
@@ -325,8 +326,8 @@ function insertProduct(itemCode,productName,departmentName,retailPrice,stockQty)
 };
 
 // select results of product add
-function selectItem(itemCode) {
-  // console.log("in global.selectItem");
+function selectItemAdded(insertId) {
+  // console.log("in global.selectItemAdded");
   var query =  "SELECT d.department_name \
                       ,p.item_code \
                       ,p.product_name \
@@ -336,9 +337,9 @@ function selectItem(itemCode) {
                   FROM product as p \
                   JOIN department as d \
                     ON p.department_id = d.department_id \
-                 WHERE p.item_code = ? \
+                 WHERE p.product_id = ? \
                  ORDER BY d.department_name, p.product_name";
-    connection.query(query,[itemCode], function(err, res) {
+    connection.query(query,[insertId], function(err, res) {
       if(err) throw err;
       console.table(res);
       main();
@@ -409,7 +410,7 @@ function viewOrders() {
 // Exit function()
 // message good-bye & set state flag for exit
 function exitSystem() {
-  console.log("in global.exitSystem");
+// console.log("in global.exitSystem");
   console.log("Goodbye");
   connection.end();
 } 
