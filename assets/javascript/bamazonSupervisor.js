@@ -64,7 +64,7 @@ function viewDepartmentSales() {
   console.log("in global.viewDepartmentSales");
   var query = "SELECT d.department_id \
                      ,d.department_name \
-                     ,d.overhead_cost \
+                     ,d.overhead_cost AS overhead_cost\
                      ,CASE \
                         WHEN ISNULL(SUM(p.product_sales)) THEN 0 \
                         ELSE SUM(p.product_sales) \
@@ -88,9 +88,8 @@ function viewDepartmentSales() {
  };
 
 // Add Department function
-// SQL call for Department Insert
 function addDepartment() {
-  console.log("in global.addDepartment");
+  // console.log("in global.addDepartment");
   inquirer
     .prompt([
       {
@@ -98,10 +97,10 @@ function addDepartment() {
         type: "input",
         message: "Enter Department Name",
         validate: function(value) {
-          if (value === null) {
-            return "Department Name cannot be blank";
+          if (value > ' ') {
+            return true;
           }
-          return true;
+          return "Department Name cannot be blank";
         }
       },
       {
@@ -117,7 +116,6 @@ function addDepartment() {
       }
     ])
   .then(function(answers) {
-    console.log(`<<< Adding department: ${answers.departmentName} : ${answers.overheadCost} >>>`);
     checkDeptNotExists(answers.departmentName,answers.overheadCost);
   })  
 };
@@ -131,7 +129,7 @@ function checkDeptNotExists(departmentName,overheadCost) {
   connection.query(query, [departmentName], function(err, res) {
     if(err) throw err;
     if (res.length > 0) {
-      console.log(`<<< Department ${departmentName} already exists >>>`);
+      console.log(`<<< Department ${departmentName} already exists - try again >>>`);
       main();
     }
     else {
@@ -151,7 +149,7 @@ function insertDepartment(departmentName,overheadCost) {
   connection.query(query, [departmentName,overheadCost], function(err, res) {
     if(err) throw err;
     if (res.affectedRows > 0) {
-      console.log(`<<< Department ${departmentName} : ${overheadCost} added >>>`);
+      // console.log(`<<< Department ${departmentName} : ${overheadCost} added >>>`);
       selectDepartment(res.insertId);
     }
     else {
@@ -174,16 +172,6 @@ function selectDepartment(insertId) {
     main();
   });
 };
-
-
-
-
-
-
-
-
-
-
 
 // Exit function()
 // message good-bye & set state flag for exit

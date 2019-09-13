@@ -4,7 +4,7 @@
 
 ## Description
 
-This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command line prompts which allow for simulation of product ordering, inventory and sales reporting functions.  
+This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command line prompts which allow for simulation of customer ordering, inventory and sales reporting functions.  
 
 ### Database Model
 
@@ -15,7 +15,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
    - in this simulation product_order has 1 product per row (if more realistic there would be an order header and order line item  to support a many to many relationship between orders and products)
    - data model is normalized
 
-2. Tables:  department, product and product_order
+2. Table Design
 
    - surrogate keys using identity columns are the primary keys for the tables:  department_id, product_id and product_order_id.  Using surrogate keys can have advantages such as ease and speed of tables joins, key permanence allowing alternate key or natural key to change, migration of keys to linkage/junction tables when many to many relationships become necessary (for exanple:  orders to items yielding an item-order linkage table) 
 
@@ -26,11 +26,11 @@ This node.js mySQL program simulates a retailer ordering and product management 
          ON product (item_code);
      ```
    
-   - Normally an order code key would have an internal assignment module, but for the scope of this project the user will be responsible for entering unique item codes when add new products to the database.
+   - Normally an order code key would have an internal assignment module, but for the scope of this project the user will be responsible for entering unique item codes when adding new products to the system.
    
    - product_sales on the product table has a default value of 0
    
-   - department_name on department table has a unique index (UK)
+   - department_name on department table is the alternate/natural key.  When adding a new department the user must choose a unique name, i.e. department_name has a unique index (UK)
    
      ```mysql
      CREATE UNIQUE INDEX UX1_department_department_name
@@ -39,7 +39,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
    
 3. Relationships
 
-   - product table has a foreign key: department_id (FK) to link it to the department table
+   - product table has a foreign key: department_id (FK) to relate it to the department table
 
      ```mysql
      ALTER TABLE product
@@ -47,7 +47,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
      FOREIGN KEY (department_id) REFERENCES department(department_id);
      ```
 
-   - product_order table has a foreign key: product_id (FK) to link it to the product table
+   - product_order table has a foreign key: product_id (FK) to relate it to the product table
 
      ```mysql
      ALTER TABLE product_order
@@ -91,7 +91,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
 1.  user starts bash session and runs either Customer, Manager or Supervisor js files
 
-2.  bamazonCustomer
+2.  **bamazonCustomer**
   
     1.  user is presented with initial prompt with options:  "See Product List", "Place order", "Exit"
     2.  "See Product List"
@@ -110,7 +110,7 @@ This node.js mySQL program simulates a retailer ordering and product management 
                 2. return to initial prompt 
     4.  "Exit" - program exits to terminal
     
-3. bamazonManager
+3. **bamazonManager**
 
     1. user is presented with initial prompt with options: "View Products", "View Low Inventory Products", "Update Inventory", "Add a new Product", "Exit"
 
@@ -162,38 +162,51 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
     7. Exit" - program exits to terminal
 
-          
+      ​    
 
-4. bamazonSupervisor
-    1. user is presented with initial prompt with options: "View Departement Sales", "Add new Department", "Exit"
-
-    2. "View Department Sales"
-
+4. **bamazonSupervisor**
+    
+1. user is presented with initial prompt with options: "View Departement Sales", "Add new Department", "Exit"
+    
+2. "View Department Sales"
+    
        1. user is prompted to:
           1. "Choose Department" (SQL join to department table will present list of valid choice)
           2. Results shown:  Department Id, Department Name, Overhead Cost, Department Sales, Profit
           3. - Department Sales is a computed value: SQL join to product table for given department and compute SUM(product.product_sales)
              - Profit is a computed value:  SQL join to product table for given department and compute Overhead cost - SUM(product.product_sales)
-       2. return to initial prompt
-
-    3. "Add new Department"
-
-       user is prompted for:
-
+   2. return to initial prompt
+    
+3. "Add new Department"
+    
+   user is prompted for:
+    
        1. "Enter Department Name"  - is validated, cannot be null - user prompted to re-enter if so
        2. "Enter Overhead Cost" - is validated, must be numeric > 0 - user prompted to re-enter if not
        3. Message showing new Deparment is shown: Department Id, Department Name, Overhead Cost 
-       4. Validation - if department name already exists - transaction is cancelled
+      4. Validation - if department name already exists - transaction is cancelled
    5. return to initial prompt
-    
+   
     4. Exit" - program exits to terminal
 
 ### Psuedo Code - details TBD
 
 1. bamazonCustomer.js 
-    1. TBD
+    1. menu function with inquirer options for See Products, Place Order, Exit
+       1. function for See Product  - SQL read for all products
+       2. function for Place Order - SQL to check item code exists, SQL to update stock qty and sales, SQL insert into order table
+       3. function to exit - end connection
 2. bamazonManager.js
-       1. TBD
+          1. menu function with inquirer options for See Products, See Low Inventory Item, Add to Inventory, Add New Product, See Orders by Date Range, Exit
+             1. function for See Product  - SQL read for all products
+             2. function for See Low Inventory Items - SQL read of all products with stock qty < 5
+             3. function for Add to Inventory - SQL to check item code, SQL to add to stock_qty 
+             4. function for Add New Product - SQL to check item code, SQL to insert into product table
+             5. function See Orders by Date Range - SQL to retrieve from order table all orders with order date between the user entered start and end dates
+             6. function to exit - end connection
   
 2. bamazonSupervisor.js
-    1. TBD
+    1. menu function with inquirer options for See Department Sales, Add new Department, Exit
+    2. function for See Department Sales - joins the deparment and product tables to get the total sales for all item grouped by department;  subtract a department's total sales from its overhead cost to show a computed total profit.  Use outer left join and CASE in select to account for the possibility of a department not having any products yet - the resultant row will show null in total sales and profit but will show overhead cost
+    3. function for Add new Department - SQL to check that department name does not exist, SQL to insert into department table
+    4. function to exit - end connection

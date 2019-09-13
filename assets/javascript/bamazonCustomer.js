@@ -58,7 +58,6 @@ function main() {
 
 
 // Product List function
-// SQL call for list of products
 function productList() {
 // console.log("in global.productList");
   var query =  "SELECT d.department_name \
@@ -109,7 +108,7 @@ function productOrder() {
       }
     ])
     .then(function(answers) {
-      console.log(`<<< Ordering item: ${answers.itemCode} Quantity ordered: ${answers.orderQty} >>>`);
+      // console.log(`<<< Ordering item: ${answers.itemCode} Quantity ordered: ${answers.orderQty} >>>`);
       checkItem(answers.itemCode,parseInt(answers.orderQty));
     })  
 }
@@ -124,7 +123,7 @@ function checkItem(itemCode,orderQty) {
   connection.query(query, [itemCode], function(err, res) {
     if(err) throw err;
     if (res.length === 0) {
-      console.log(`<<< Item Code ${itemCode} does not exist >>>`);
+      console.log(`<<< Item Code ${itemCode} does not exist - try order again >>>`);
       main();
     }
     else {
@@ -142,7 +141,7 @@ function checkOrderQty(itemCode,orderQty) {
   connection.query(query, [itemCode,orderQty], function(err, res) {
     if(err) throw err;
     if (res.length === 0) {
-      console.log(`<<< Item ${itemCode} does not have quantity of ${orderQty} on hand >>>`);
+      console.log(`<<< Item ${itemCode} does not have quantity of ${orderQty} on hand - try order again >>>`);
       main();
     }
     else {
@@ -180,11 +179,10 @@ function insertOrder(itemCode,orderQty) {
   connection.query(query, [orderQty,orderQty,itemCode], function(err, res) {
     if(err) throw err;
     if (res.affectedRows > 0) {
-      console.log(`<<< product_order for ${itemCode} inserted >>>`);
       selectItem(itemCode,orderQty);
     }
     else {
-      console.log(`<<< Unexpected failure trying to add product_order for ${itemCode} : >>>`);
+      console.log(`<<< Unexpected failure trying to add product_order for ${itemCode} >>>`);
       main();
     }
   })
@@ -203,7 +201,7 @@ function selectItem(itemCode,orderQty) {
 
   connection.query(query,[orderQty,orderQty,itemCode], function(err, res) {
     if(err) throw err;
-    console.log("<<< Order Succesfull >>>")
+    // console.log(`<<< product_order for ${itemCode} inserted completed >>>`);
     console.table(res);
     main();
   });

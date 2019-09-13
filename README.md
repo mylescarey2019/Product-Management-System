@@ -3,27 +3,34 @@
 ## Node  & mySQL product ordering and management program
 
 
-Utlizing Node.js, mySQL, javascript ES6, classes and npm packages
+Utlizing Node.js, mySQL, javascript ES6 and npm packages
 
 ## Description
 
-This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command prompts allow for simulationg of product ordering, inventory and sales functions.app has command line interface for playing a hangman style game using the US President names as a word set.
+This node.js mySQL program simulates a retailer ordering and product management system leveraging mySQL database as backend product database.  Node inquirer command prompts allow for simulation of customer ordering, inventory and sales functions.
 
 ## Details:
 
 - #### Github project :    <a href="https://github.com/mylescarey2019/Product-Management-System">Product-Management-System Repository</a>
 
-- #### For further development details see: 
+- #### For further design and development details see: 
 
   - ####  [UseCases and Psuedo Code](UseCases-PsuedoCode.md)
 
-  - ####  [Test Cases](TestCases.md)
+  - ####  [Test Cases](TestCases.md)  - includes unit test result screenshots
+  
+  - #### [Database Schema and SQL Queries](Database-Schema.md)
 
 - #### Data Model & Design Whiteboard:
 
+  - Entity Data Model:  Department, Product and Product Order
+  - Addional functions added:
+    - Customer Orders save to product order table
+    - Manager can view orders by date range
+
 ![bamazon-design-sml](./assets/images/data-model-sml.jpg)
 
-#### Example walkthru GIF :
+#### Demo walkthru GIF :  ![bamazon-demo](./assets/images/bamazon-demo.gif)
 
 
 
@@ -52,9 +59,12 @@ This node.js mySQL program simulates a retailer ordering and product management 
 
 #### Possible Enhancements
 
-1. expand the data model by adding  order, order line item and order total tables
-2. expand function to support multi item orders using above data model
-3. add item code assignment stored procedure with simulated business rules instead of having user pick new item codes
+- [x] expand the data model by adding order table to track every order (simple design: 1 order : 1 product)
+- [ ] expand the data model further by changing to order design to instead use tables for order line item and order total  -  allowing a many to many relationship between products and ordersexpand function to 
+- [ ] support multi item orders using above data model
+
+- [ ] add item code assignment stored procedure with simulated business rules instead of having user pick new item codes
+- [ ] refactoring with purpose of consolidating duplicate quiries across the 3 js modules
 
 
 
