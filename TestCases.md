@@ -129,7 +129,7 @@ Functionality Cases
 
           ![test-2.18](./assets/images/test-2.18.png)
 
-     				![test-2.19](./assets/images/test-2.19.png)
+          ![test-2.19](./assets/images/test-2.19.png)
 
     ​            	
 
