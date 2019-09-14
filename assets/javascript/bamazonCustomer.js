@@ -192,6 +192,7 @@ function insertOrder(itemCode,orderQty) {
 function selectItem(itemCode,orderQty) {
 // console.log("in global.selectItem");
   var query =  "SELECT p.item_code \
+                      ,p.product_name \
                       ,p.retail_price \
                       ,? as order_qty \
                       ,p.retail_price * ? AS total_order_cost \

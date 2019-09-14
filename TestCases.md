@@ -27,7 +27,7 @@ Functionality Cases
         1. expect prompt for order quantity
             1. enter non-number - expect prompt for re-entry
             
-               ![test 1.4](./assets/images/test 1.4.png)
+               ![test 1.4](./assets/images/test-1.4.png)
             
             2. enter 0 - expect prompt for re-entry
             
@@ -119,7 +119,7 @@ Functionality Cases
 
        2. prompted for end date - expect prompt if not date format
 
-          ![test 2-16](./assets/images/test 2-16.png)
+          ![test 2-16](./assets/images/test-2-16.png)
 
        3. all orders that have order_date within the start and end dates will be shown - sorted by department, order date, product name
 
